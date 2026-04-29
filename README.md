@@ -64,4 +64,66 @@ The native architectural flow uses four key relational sheets inside the `CRM_Sa
 3. **Deals**: The core Sales Pipeline tracker mapping probabilities against Expected Close Dates!
 4. **Support Tickets**: CSAT resolution tracking, assigned to categories to gauge native product health and API downtime issues!
 
+
+🪟 For Windows Customers
+Windows makes it very easy to run the app in the background silently. Your project has a run_hidden.vbs script that avoids the black terminal box and boots the server invisibly.
+
+Setup Steps for the Customer:
+
+Send them the complete folder of your application.
+Tell them to double-click start.bat at least once just to make sure it runs (it will install Python dependencies automatically).
+Once confirmed it works, tell them to press Win + R on their keyboard, type shell:startup, and press Enter. This will open their Windows Startup folder.
+Go to the CRM application folder, right-click on run_hidden.vbs, and select Create Shortcut.
+Drag and drop that newly created shortcut into the shell:startup folder that was opened in Step 3.
+Result: Every time the customer turns on their computer, Windows will automatically boot up the CRM server invisibly in the background. They can simply bookmark http://localhost:5000 in their browser and it will always work.
+
+🐧 For Linux Customers
+For Linux, the best paradigm is using systemd to run it as a robust background service that automatically revives itself and starts on boot. Your install_linux_service.sh script handles this perfectly.
+
+Setup Steps for the Customer:
+
+Have them open a terminal and navigate to the application folder.
+First, they should make sure the script is executable (if it isn't already):
+bash
+chmod +x install_linux_service.sh start.sh
+Run the installer script with root permissions:
+bash
+sudo ./install_linux_service.sh
+Result: The script automatically generates a nexuscrm.service, enables it on boot, and starts it. The backend is now fully embedded in their OS. They can check it anytime by going to http://localhost:5000.
+
+Note: They can view logs using sudo journalctl -u nexuscrm -f or restart it utilizing sudo systemctl restart nexuscrm if they ever need to.
+
+🍎 For Mac Customers
+Mac users can use launchd to achieve a similar permanent background setup. Since you don't have a script for Mac yet, here is what they can do:
+
+Setup Steps for the Customer:
+
+Open a terminal and run nano ~/Library/LaunchAgents/com.ckinternal.crm.plist
+Add the following XML (replacing TARGET_PATH with the actual path to the folder):
+xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ckinternal.crm</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>TARGET_PATH/start.sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>TARGET_PATH</string>
+</dict>
+</plist>
+Save the file (Ctrl + O, Enter, Ctrl + X).
+Load the script so it turns on: launchctl load ~/Library/LaunchAgents/com.ckinternal.crm.plist
+Important Advice for Distribution
+Make sure your customers have Python 3.8+ installed before they run these steps because your application relies on it to build the virtual environment (venv). It's highly recommended to instruct them to check the "Add Python to PATH" box if they install it freshly on Windows.
+
+
 *Note: The frontend architecture natively features "Safe-Float" constraints, meaning if your user edits an Excel document row maliciously by typing characters instead of numbers for pricing tables, the server will intentionally parse that bad data to $0 instead of crashing!*
