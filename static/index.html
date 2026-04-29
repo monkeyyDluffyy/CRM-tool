@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusCRM — Customer Relationship Management</title>
+    <meta name="description" content="Premium CRM dashboard with real-time Excel data synchronization">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <span class="logo-text">CK<span class="logo-accent">Internal</span></span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-view="Customers" id="nav-customers">
+                <i class="fas fa-users"></i>
+                <span>Customers</span>
+                <span class="nav-badge" id="badge-customers">0</span>
+            </a>
+            <a href="#" class="nav-item" data-view="Interactions" id="nav-interactions">
+                <i class="fas fa-comments"></i>
+                <span>Interactions</span>
+                <span class="nav-badge" id="badge-interactions">0</span>
+            </a>
+            <a href="#" class="nav-item" data-view="Deals" id="nav-deals">
+                <i class="fas fa-handshake"></i>
+                <span>Deals</span>
+                <span class="nav-badge" id="badge-deals">0</span>
+            </a>
+            <a href="#" class="nav-item" data-view="Support Tickets" id="nav-tickets">
+                <i class="fas fa-ticket"></i>
+                <span>Tickets</span>
+                <span class="nav-badge" id="badge-tickets">0</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sync-status" id="sync-status">
+                <div class="sync-dot synced"></div>
+                <span>Synced with Excel</span>
+            </div>
+            <div class="last-sync" id="last-sync-time">Last sync: just now</div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Overview of your CRM metrics</p>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="search-box" id="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search records..." id="global-search">
+                </div>
+                <button class="btn-refresh" id="btn-refresh" title="Force sync from Excel">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <div class="live-indicator" id="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>LIVE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content-area" id="content-area">
+            <!-- Dashboard View (default) -->
+            <div class="view active" id="view-dashboard">
+                <!-- KPI Cards -->
+                <div class="kpi-grid" id="kpi-grid">
+                    <div class="kpi-card kpi-gradient-1">
+                        <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Customers</span>
+                            <span class="kpi-value" id="kpi-customers">0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-gradient-2">
+                        <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Monthly Revenue</span>
+                            <span class="kpi-value" id="kpi-mrr">$0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-gradient-3">
+                        <div class="kpi-icon"><i class="fas fa-funnel-dollar"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Pipeline Value</span>
+                            <span class="kpi-value" id="kpi-pipeline">$0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-gradient-4">
+                        <div class="kpi-icon"><i class="fas fa-heartbeat"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Avg Health Score</span>
+                            <span class="kpi-value" id="kpi-health">0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-gradient-5">
+                        <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Deals Won</span>
+                            <span class="kpi-value" id="kpi-won">0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                    <div class="kpi-card kpi-gradient-6">
+                        <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Open Tickets</span>
+                            <span class="kpi-value" id="kpi-tickets">0</span>
+                        </div>
+                        <div class="kpi-sparkline"></div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Customer Tier Distribution</h3>
+                            <span class="chart-subtitle">By tier level</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-tiers"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Deal Pipeline</h3>
+                            <span class="chart-subtitle">By stage</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-deals"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Revenue by Tier</h3>
+                            <span class="chart-subtitle">MRR distribution</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-revenue"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Ticket Priority</h3>
+                            <span class="chart-subtitle">Support breakdown</span>
+                        </div>
+                        <div class="chart-body">
+                            <canvas id="chart-tickets"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <div class="chart-card full-width">
+                        <div class="chart-header">
+                            <h3>Customer Overview</h3>
+                            <span class="chart-subtitle">Health & revenue snapshot</span>
+                        </div>
+                        <div class="customer-cards" id="customer-cards">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Views (Customers, Interactions, Deals, Tickets) -->
+            <div class="view" id="view-table">
+                <div class="table-toolbar">
+                    <div class="toolbar-left">
+                        <div class="table-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Filter records..." id="table-search-input">
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="btn btn-primary" id="btn-add-record">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Record</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="data-table">
+                        <thead id="table-head"></thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+                <div class="table-footer" id="table-footer">
+                    <span class="record-count" id="record-count">0 records</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Record</h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Form fields generated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-save">
+                    <i class="fas fa-save"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal-overlay">
+        <div class="modal modal-sm">
+            <div class="modal-header modal-header-danger">
+                <h2><i class="fas fa-trash-alt"></i> Delete Record</h2>
+                <button class="modal-close" id="delete-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="delete-message">Are you sure you want to delete this record? This will also update the Excel
+                    file.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="delete-cancel">Cancel</button>
+                <button class="btn btn-danger" id="delete-confirm">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="/app.js"></script>
+</body>
+
+</html>
