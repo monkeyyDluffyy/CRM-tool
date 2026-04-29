@@ -24,7 +24,7 @@ CORS(app)
 #   2. Environment variable:    export CRM_EXCEL_FILE=/path/to/your/file.xlsx
 #   3. Default:                 CRM_Sample_Data_Template.xlsx (in this folder)
 #
-DEFAULT_EXCEL = "/home/abhay/Downloads/CRM_Sample_Data_Template.xlsx"
+DEFAULT_EXCEL = "/home/abhay/Downloads/CRM_Sample_Data_Template (3).xlsx"
 
 if len(sys.argv) > 1 and sys.argv[1].endswith('.xlsx'):
     EXCEL_FILE = os.path.abspath(sys.argv[1])
@@ -78,34 +78,40 @@ def read_excel_data():
 
 
 def write_to_excel(sheet_name, data_rows, headers):
-    """Write data back to a specific sheet in the Excel file."""
+    """Write data back to a specific sheet in the Excel file cleanly to preserve formatting."""
     with file_lock:
         try:
             wb = openpyxl.load_workbook(EXCEL_FILE)
         except Exception:
             wb = openpyxl.Workbook()
 
-        # Remove existing sheet if it exists
-        if sheet_name in wb.sheetnames:
-            del wb[sheet_name]
-
-        # Create sheet at correct position
-        desired_order = ['Customers', 'Interactions', 'Deals', 'Support Tickets']
-        if sheet_name in desired_order:
-            idx = desired_order.index(sheet_name)
-            # Clamp to valid range
-            idx = min(idx, len(wb.sheetnames))
-            ws = wb.create_sheet(sheet_name, idx)
+        # If sheet doesn't exist, create it cleanly
+        if sheet_name not in wb.sheetnames:
+            desired_order = ['Customers', 'Interactions', 'Deals', 'Support Tickets']
+            if sheet_name in desired_order:
+                idx = desired_order.index(sheet_name)
+                idx = min(idx, len(wb.sheetnames))
+                ws = wb.create_sheet(sheet_name, idx)
+            else:
+                ws = wb.create_sheet(sheet_name)
+            ws.append(headers)
+            start_row = 2
         else:
-            ws = wb.create_sheet(sheet_name)
+            ws = wb[sheet_name]
+            # Figure out where the data starts (checking for the AUTO: instruction row)
+            start_row = 2
+            val = ws.cell(row=2, column=1).value
+            if val and str(val).strip().startswith("AUTO:"):
+                start_row = 3
+            
+            # Delete old data rows to prepare for fresh write
+            max_row = ws.max_row
+            if max_row >= start_row:
+                ws.delete_rows(start_row, max_row - start_row + 1)
 
-        # Write headers
-        ws.append(headers)
-
-        # Write data rows
-        for row_dict in data_rows:
-            row = []
-            for h in headers:
+        # Write fresh data rows
+        for r_idx, row_dict in enumerate(data_rows, start=start_row):
+            for c_idx, h in enumerate(headers, start=1):
                 val = row_dict.get(h, '')
                 # Try to convert numeric strings
                 if isinstance(val, str) and val.strip():
@@ -116,16 +122,15 @@ def write_to_excel(sheet_name, data_rows, headers):
                             val = int(val)
                     except (ValueError, TypeError):
                         pass
-                row.append(val)
-            ws.append(row)
+                ws.cell(row=r_idx, column=c_idx, value=val)
 
         # Remove default sheet if it exists and is empty
         if 'Sheet' in wb.sheetnames and len(wb['Sheet'].dimensions) <= 2:
-            del wb['Sheet']
+             del wb['Sheet']
 
         wb.save(EXCEL_FILE)
         wb.close()
-        print(f"[SYNC] ✅ Excel file updated: {sheet_name} ({len(data_rows)} rows)")
+        print(f"[SYNC] ✅ Excel file updated safely: {sheet_name} ({len(data_rows)} rows)")
 
 
 # ─── API Routes ───
